@@ -9,14 +9,14 @@ app.set('view engine', 'ejs'); // set up ejs for templating
 app.use(express.static('public'));
 
 // express server
-var server = app.listen(3000, function () {
+var server = app.listen(3000, function() {
     var host = server.address().address
     var port = server.address().port
     console.log("Example app listening at http://%s:%s", host, port);
 });
 
 // route
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.render('index.ejs');
 });
 
@@ -25,28 +25,46 @@ var io = require('socket.io')(server);
 var connections = [];
 
 // Registar o evento Connection
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
 
-    socket.on('connected', function(){
+    socket.on('connected', function() {
         console.log('A user connected');
-        socket.username = "User - " + uuidv1();
+        socket.username = "User " + uuidv1();
         connections.push(socket.username);
         io.emit('connected', { users: connections });
+        var message = "Has joined the chat!";
+        io.sockets.emit('broadcast_message', { message: message, username: socket.username, importance: 2 });
         console.log("Users connected: ", connections.length);
-        console.log(connections);
     });
-    
+
     //Broadcast the new message
     socket.on('send_message', (data) => {
-        io.sockets.emit('broadcast_message', { message: data.message, username: socket.username });
+        io.sockets.emit('broadcast_message', { message: data.message, username: socket.username, importance: 3 });
     });
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function() {
         console.log('User disconnected');
-        connections.splice(connections.indexOf(socket), 1);
+        var message = "Has left the chat!";
+        io.sockets.emit('broadcast_message', { message: message, username: socket.username, importance: 1 });
+        connections.splice(connections.indexOf(socket.username), 1);
         console.log("Users connected: ", connections.length);
-        io.emit('connected',{users: connections});
+        io.emit('connected', { users: connections });
     });
+
+    socket.on('change_name', (data) => {
+        var newName = data.newName;
+        for (var i = 0; i < connections.length; i++) {
+            if (connections[i] == socket.username) {
+                var changeID = i;
+            }
+        }
+        var splitedName = socket.username.split(' ');
+        splitedName[0] = newName;
+        var previousName = socket.username;
+        socket.username = splitedName[0].concat(' ', splitedName[1]);
+        connections[changeID] = socket.username;
+        var message = "Changed his username to " + socket.username;
+        io.sockets.emit('broadcast_message', { message: message, username: previousName, importance: 1 });
+        io.emit('connected', { users: connections, username: socket.username });
+    })
 });
-
-
