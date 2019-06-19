@@ -41,6 +41,7 @@ $(function() {
         } else {
             chatroom.append($('<tr scope="row">').append('<p style="font-weight: bold">' + data.username + ": </p>" + '<p>' + data.message + '</p>'));
         }
+        message.val('');
     });
 
     //Emite name change
@@ -50,6 +51,7 @@ $(function() {
         } else {
             socket.emit('change_name', { newName: userName.val() })
         }
+        userName.val('');
     });
 
     socket.on('alert', function(data) {
