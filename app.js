@@ -22,14 +22,15 @@ app.get('/', function(req, res) {
 
 var io = require('socket.io')(server);
 
+//Array of connections to app
 var connections = [];
 
-// Registar o evento Connection
+//Register event Connection
 io.on('connection', function(socket) {
 
     socket.on('connected', function() {
         console.log('A user connected');
-        socket.username = "User " + uuidv1();
+        socket.username = "User + " + uuidv1();
         connections.push(socket.username);
         io.emit('connected', { users: connections });
         var message = "Has joined the chat!";
@@ -42,6 +43,7 @@ io.on('connection', function(socket) {
         io.sockets.emit('broadcast_message', { message: data.message, username: socket.username, importance: 3 });
     });
 
+    //Handle user disconect
     socket.on('disconnect', function() {
         console.log('User disconnected');
         var message = "Has left the chat!";
@@ -51,20 +53,26 @@ io.on('connection', function(socket) {
         io.emit('connected', { users: connections });
     });
 
+    //Handle change name
     socket.on('change_name', (data) => {
         var newName = data.newName;
-        for (var i = 0; i < connections.length; i++) {
-            if (connections[i] == socket.username) {
-                var changeID = i;
+        var splitedName = socket.username.split(' +');
+        if (splitedName[0] == newName) {
+            var message = "This is already your name!"
+            io.emit('alert', { message: message });
+        } else {
+            for (var i = 0; i < connections.length; i++) {
+                if (connections[i] == socket.username) {
+                    var changeID = i;
+                }
             }
+            splitedName[0] = newName;
+            var previousName = socket.username;
+            socket.username = splitedName[0].concat(' + ', splitedName[1]);
+            connections[changeID] = socket.username;
+            var message = "Changed his username to " + socket.username;
+            io.sockets.emit('broadcast_message', { message: message, username: previousName, importance: 1 });
+            io.emit('connected', { users: connections, username: socket.username });
         }
-        var splitedName = socket.username.split(' ');
-        splitedName[0] = newName;
-        var previousName = socket.username;
-        socket.username = splitedName[0].concat(' ', splitedName[1]);
-        connections[changeID] = socket.username;
-        var message = "Changed his username to " + socket.username;
-        io.sockets.emit('broadcast_message', { message: message, username: previousName, importance: 1 });
-        io.emit('connected', { users: connections, username: socket.username });
-    })
+    });
 });

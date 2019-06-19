@@ -17,13 +17,17 @@ $(function() {
     socket.on('connected', function(data) {
         userList.empty();
         for (var i = 0; i < data.users.length; i++) {
-            userList.append($('<tr scope="row">').text(data.users[i]));
+            userList.append($('<tr>').append('<p style="font-weight: bold">' + data.users[i] + ": </p>"));
         }
     });
 
     //Emit message
     send_message.click(function() {
-        socket.emit('send_message', { message: message.val() })
+        if (message.val().length == 0) {
+            alert("Empty message field!");
+        } else {
+            socket.emit('send_message', { message: message.val() })
+        }
     });
 
     //Listen on new_message
@@ -41,7 +45,14 @@ $(function() {
 
     //Emite name change
     changeName.click(function() {
-        socket.emit('change_name', { newName: userName.val() })
+        if (userName.val().length == 0) {
+            alert("Name field empty!");
+        } else {
+            socket.emit('change_name', { newName: userName.val() })
+        }
     });
 
+    socket.on('alert', function(data) {
+        alert(data.message);
+    });
 });

@@ -27,7 +27,7 @@
                     </div>
                 </div>
 
-                <table>
+                <table class="table  table-striped" style="border-collapse:separate; border-spacing: 0 15px">
                     <tbody id="userList">
                     </tbody>
                 </table>
@@ -37,7 +37,7 @@
             <div class="col-sm-8 scroll">
                 <div class="chatbody" id="chatWindow" style="height: 35rem; overflow-y: auto">
 
-                    <table class="table">
+                    <table class="table" style="border-collapse:separate; border-spacing: 0 15px">
                         <tbody id="chatroom">
                         </tbody>
                     </table>
@@ -62,6 +62,14 @@
     <script>
         $(function() {
             $("#send_message").click(function() {
+                $('#chatWindow').animate({
+                    scrollTop: $('#chatWindow')[0].scrollHeight
+                }, "fast");
+            });
+        });
+
+        $(function() {
+            $("#change_name").click(function() {
                 $('#chatWindow').animate({
                     scrollTop: $('#chatWindow')[0].scrollHeight
                 }, "fast");
