@@ -4,9 +4,15 @@
 <head>
     <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
     <link href="http://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="/socket.io/socket.io.js"></script>
     <title> Chat App</title>
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,7 +22,7 @@
 
     <div class="container" style="margin-top: 5rem">
         <div class="row">
-            <div class="col-sm-4" style="height: 35rem; overflow-y: auto">
+            <div class="col-sm-4" style="height: 30rem; overflow-y: auto">
 
                 <div class="row" style="margin-bottom: 2rem; margin-top: 0.2rem;">
                     <div class="col-md-8">
@@ -27,7 +33,7 @@
                     </div>
                 </div>
 
-                <table class="table  table-striped" style="border-collapse:separate; border-spacing: 0 15px">
+                <table id="users" class="table  table-striped" style="border-collapse:separate; border-spacing: 0 15px">
                     <tbody id="userList">
                     </tbody>
                 </table>
@@ -35,9 +41,9 @@
             </div>
 
             <div class="col-sm-8 scroll">
-                <div class="chatbody" id="chatWindow" style="height: 35rem; overflow-y: auto">
+                <div class="chatbody" id="chatWindow" style="height: 30rem; overflow-y: auto">
 
-                    <table class="table" style="border-collapse:separate; border-spacing: 0 15px">
+                    <table id="chat" class="table" style="border-collapse:separate; border-spacing: 0 15px">
                         <tbody id="chatroom">
                         </tbody>
                     </table>
@@ -45,12 +51,19 @@
                 </div>
 
                 <div class="row" id="input_zone">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <input id="message" type="text" placeholder="Insert text..." class="form-control" />
                     </div>
                     <div class="col-md-4">
                         <button id="send_message" class="btn btn-info btn-block">Send</button>
                     </div>
+                    <form class="col-md-2" enctype="multipart/form-data" action="/test.php" method="post">
+                        <div>
+                            <label class="btn btn-info btn-block" style="cursor: pointer;">
+                                Image... <input id="image" type="file" style="display: none;">
+                            </label>
+                        </div>
+                    </form>
                 </div>
 
             </div>
@@ -60,16 +73,16 @@
     <script src="chat.js"></script>
 
     <script>
-        $(function() {
-            $("#send_message").click(function() {
+        $(function () {
+            $("#send_message").click(function () {
                 $('#chatWindow').animate({
                     scrollTop: $('#chatWindow')[0].scrollHeight
                 }, "fast");
             });
         });
 
-        $(function() {
-            $("#change_name").click(function() {
+        $(function () {
+            $("#change_name").click(function () {
                 $('#chatWindow').animate({
                     scrollTop: $('#chatWindow')[0].scrollHeight
                 }, "fast");
