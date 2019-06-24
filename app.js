@@ -80,8 +80,7 @@ if (fs.existsSync(logDir)) {
 } else {
     fs.mkdirSync(logDir);
 }
-var dayHours = new Date()
-var data = dayHours.getDate() + "/" + dayHours.getMonth() + "/" + dayHours.getFullYear() + " on " + dayHours.getHours() + ":" + dayHours.getMinutes() + ":" + dayHours.getSeconds();
+
 //Check if image dir exists
 if (!fs.existsSync(imgDir)) {
     fs.mkdirSync(imgDir);
@@ -105,8 +104,12 @@ io.on('connection', function (socket) {
         io.emit('connected', { users: connections });
         var message = "Has joined the chat!";
         io.sockets.emit('broadcast_message', { message: message, username: socket.username, importance: 2 });
+        //Write history
         writeMessage = socket.username + " " + message + "\n";
         writeStream.write(writeMessage);
+        //Day and Hour
+        var dayHours = new Date()
+        var data = dayHours.getDate() + "/" + dayHours.getMonth() + "/" + dayHours.getFullYear() + " on " + dayHours.getHours() + ":" + dayHours.getMinutes() + ":" + dayHours.getSeconds();
         writeMessageLog = socket.username + " " + message + " at " + data + "\n";
         writeLog.write(writeMessageLog);
     });
@@ -186,8 +189,14 @@ io.on('connection', function (socket) {
                 rimraf.sync(imgDir + '/*');
             }
             io.emit('connected', { users: connections });
+            //History
             writeMessage = socket.username + " " + message + "\n";
             writeStream.write(writeMessage);
+            //Log
+            var dayHours = new Date()
+            var data = dayHours.getDate() + "/" + dayHours.getMonth() + "/" + dayHours.getFullYear() + " on " + dayHours.getHours() + ":" + dayHours.getMinutes() + ":" + dayHours.getSeconds();
+            writeMessageLog = socket.username + " " + message + " at " + data + "\n";
+            writeLog.write(writeMessageLog);
         } else {
             socket.emit('reload');
         }
