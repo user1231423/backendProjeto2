@@ -60,6 +60,8 @@ var users = [];
 var historyDir = './history';
 var historyFile = './history/history.txt';
 var imgDir = './public/images'
+var logDir = './log'
+var logFile = './log/file.log'
 
 //Check if file and dir exists if not then we will create it
 if (fs.existsSync(historyDir)) {
@@ -70,6 +72,16 @@ if (fs.existsSync(historyDir)) {
     fs.mkdirSync(historyDir);
 }
 
+//Check if log and dir exists if not then we will create it
+if (fs.existsSync(logDir)) {
+    if (!fs.existsSync(logFile)) {
+        fs.writeFileSync(logFile, '');
+    }
+} else {
+    fs.mkdirSync(logDir);
+}
+var dayHours = new Date()
+var data = dayHours.getDate() + "/" + dayHours.getMonth() + "/" + dayHours.getFullYear() + " on " + dayHours.getHours() + ":" + dayHours.getMinutes() + ":" + dayHours.getSeconds();
 //Check if image dir exists
 if (!fs.existsSync(imgDir)) {
     fs.mkdirSync(imgDir);
@@ -77,6 +89,8 @@ if (!fs.existsSync(imgDir)) {
 
 //Create write stream with append
 var writeStream = fs.createWriteStream(historyFile, { 'flags': 'a' });
+
+var writeLog = fs.createWriteStream(logFile, { 'flags': 'a' });
 
 //Register event Connection
 io.on('connection', function (socket) {
@@ -93,6 +107,8 @@ io.on('connection', function (socket) {
         io.sockets.emit('broadcast_message', { message: message, username: socket.username, importance: 2 });
         writeMessage = socket.username + " " + message + "\n";
         writeStream.write(writeMessage);
+        writeMessageLog = socket.username + " " + message + " at " + data + "\n";
+        writeLog.write(writeMessageLog);
     });
 
     //Broadcast the new message
