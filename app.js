@@ -17,7 +17,9 @@ var storage = multer.diskStorage({
     filename: (req, file, cb) => {
         //Allow only jpeg or png
         if ((file.mimetype == 'image/png') || (file.mimetype == 'image/jpeg')) {
-            cb(null, file.fieldname + '-' + uuidv1() + '.jpg'); //image name is always generated with given field name + random id
+            var type = file.mimetype.split('/');
+            var fileType = type[1];
+            cb(null, file.fieldname + '-' + uuidv1() + '.' + fileType); //image name is always generated with given field name + random id
         } else {
             return cb('Only png or jpeg are allowed!');
         }
