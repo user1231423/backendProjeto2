@@ -79,7 +79,6 @@ $(function () {
                 socket.emit('image_upload', { img: res.file })
             },
             error: function (res) {
-                console.log(res.responseText);
                 socket.emit('alert_message', { message: res.responseText })
             }
         });

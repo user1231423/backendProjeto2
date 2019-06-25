@@ -166,7 +166,8 @@ io.on('connection', function (socket) {
     socket.on('send_message', (data) => {
         //If it's not possible to get socket username we will refresh the page so he can get a new one
         if (socket.username != undefined) {
-            if (data.message.length == 0) {
+            var trim = data.message.trim();
+            if ((data.message.length == 0) || (trim.length == 0)) {
                 var message = "Empty message!";
                 socket.emit('alert', { message: message });
             } else {
@@ -267,37 +268,43 @@ io.on('connection', function (socket) {
         if (socket.username != undefined) {
             //Get the new name and split the string to get new name and uuid
             var newName = data.newName;
-            var splitedName = socket.username.split('+');//Split on '+'
-            //If the new name is the same alert the user
-            if (splitedName[0] == newName) {
-                var message = "This is already your name!"
+            var trim  = newName.trim();
+            if(trim.length == 0){
+                var message = "Please send a name!";
                 socket.emit('alert', { message: message });
-            } else {
-                //Loop users array to find a user with the current socket name
-                for (var x = 0; x < users.length; x++) {
-                    if (users[x].name == socket.username) {
-                        var changeName = x;
+            }else{
+                var splitedName = socket.username.split(' +');//Split on '+'
+                //If the new name is the same alert the user
+                if (splitedName[0] == newName) {
+                    var message = "This is already your name!"
+                    socket.emit('alert', { message: message });
+                } else {
+                    //Loop users array to find a user with the current socket name
+                    for (var x = 0; x < users.length; x++) {
+                        if (users[x].name == socket.username) {
+                            var changeName = x;
+                        }
                     }
+                    //Change the name on the arrays
+                    splitedName[0] = newName;
+                    var previousName = socket.username;
+                    socket.username = splitedName[0].concat(' +', splitedName[1]);
+                    connections[changeName] = socket.username;
+    
+                    //Alert current user of name change
+                    users[changeName].name = socket.username;
+                    var message = "You changed you name to: " + socket.username;
+                    socket.emit('broadcast_message', { message: message, username: socket.username, importance: 1 });
+    
+                    //Alert other users of name change
+                    var message = "Changed his username to " + socket.username;
+                    socket.broadcast.emit('broadcast_message', { message: message, username: previousName, importance: 1 });
+                    io.emit('connected', { users: connections, username: socket.username });
+    
+                    //Write history
+                    writeMessage = previousName + " " + message + "\n";
+                    writeHistoryStream.write(writeMessage);
                 }
-                //Change the name on the arrays
-                splitedName[0] = newName;
-                var previousName = socket.username;
-                socket.username = splitedName[0].concat(' +', splitedName[1]);
-                connections[changeName] = socket.username;
-
-                //Alert current user of name change
-                users[changeName].name = socket.username;
-                var message = "You changed you name to: " + socket.username;
-                socket.emit('broadcast_message', { message: message, username: socket.username, importance: 1 });
-
-                //Alert other users of name change
-                var message = "Changed his username to " + socket.username;
-                socket.broadcast.emit('broadcast_message', { message: message, username: previousName, importance: 1 });
-                io.emit('connected', { users: connections, username: socket.username });
-
-                //Write history
-                writeMessage = previousName + " " + message + "\n";
-                writeHistoryStream.write(writeMessage);
             }
         } else {
             socket.emit('reload');
