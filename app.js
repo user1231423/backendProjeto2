@@ -35,7 +35,7 @@ app.use(express.static('public'));
 app.use(bodyParsrer.json());
 
 // express server
-var server = app.listen(3000, function () {
+var server = app.listen(3000, function() {
     var host = server.address().address
     var port = server.address().port
     console.log("Example app listening at http://%s:%s", host, port);
@@ -45,13 +45,13 @@ var server = app.listen(3000, function () {
 var io = require('socket.io')(server);
 
 //Routes
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.render('index.ejs');
 });
 
 //Image upload route
-app.post('/upload', function (req, res) {
-    upload(req, res, function (err) {
+app.post('/upload', function(req, res) {
+    upload(req, res, function(err) {
         if (err) {
             res.status(406).send(err);
         } else {
@@ -110,6 +110,9 @@ function checkFiles() {
         }
     } else {
         fs.mkdirSync(logDir);
+        if (!fs.existsSync(logFile)) {
+            fs.writeFileSync(logFile, '');
+        }
     }
 
     //Check if image dir exists
@@ -125,18 +128,18 @@ function checkFiles() {
 }
 
 //Register event Connection
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
     //Call checkFiles function
     checkFiles();
 
     //On user connection
-    socket.on('connected', function () {
+    socket.on('connected', function() {
         socket.username = "User + " + uuidv1();
         var user = {
-            name: socket.username,
-            id: socket.id
-        }
-        //push user object into users array
+                name: socket.username,
+                id: socket.id
+            }
+            //push user object into users array
         users.push(user);
         //push username into connections array
         connections.push(socket.username);
@@ -171,9 +174,9 @@ io.on('connection', function (socket) {
                 var message = "Empty message!";
                 socket.emit('alert', { message: message });
             } else {
-                if (data.message[0] == '@') {//This checks if it is a private message
+                if (data.message[0] == '@') { //This checks if it is a private message
                     for (var i = 0; i < data.message.length; i++) {
-                        if (data.message[i] == ':') {//Check if there is ':' so that we know it is a message
+                        if (data.message[i] == ':') { //Check if there is ':' so that we know it is a message
                             var valid = true;
                             break;
                         } else {
@@ -234,7 +237,7 @@ io.on('connection', function (socket) {
     });
 
     //Handle user disconect
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function() {
         //If it's not possible to get socket username we will refresh the page so he can get a new one
         if (socket.username != undefined) {
             //Let all users know someone has left the chat
@@ -268,12 +271,12 @@ io.on('connection', function (socket) {
         if (socket.username != undefined) {
             //Get the new name and split the string to get new name and uuid
             var newName = data.newName;
-            var trim  = newName.trim();
-            if(trim.length == 0){
+            var trim = newName.trim();
+            if (trim.length == 0) {
                 var message = "Please send a name!";
                 socket.emit('alert', { message: message });
-            }else{
-                var splitedName = socket.username.split(' +');//Split on '+'
+            } else {
+                var splitedName = socket.username.split(' +'); //Split on '+'
                 //If the new name is the same alert the user
                 if (splitedName[0] == newName) {
                     var message = "This is already your name!"
@@ -290,17 +293,17 @@ io.on('connection', function (socket) {
                     var previousName = socket.username;
                     socket.username = splitedName[0].concat(' +', splitedName[1]);
                     connections[changeName] = socket.username;
-    
+
                     //Alert current user of name change
                     users[changeName].name = socket.username;
                     var message = "You changed you name to: " + socket.username;
                     socket.emit('broadcast_message', { message: message, username: socket.username, importance: 1 });
-    
+
                     //Alert other users of name change
                     var message = "Changed his username to " + socket.username;
                     socket.broadcast.emit('broadcast_message', { message: message, username: previousName, importance: 1 });
                     io.emit('connected', { users: connections, username: socket.username });
-    
+
                     //Write history
                     writeMessage = previousName + " " + message + "\n";
                     writeHistoryStream.write(writeMessage);
