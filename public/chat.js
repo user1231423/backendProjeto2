@@ -18,7 +18,7 @@ $(function () {
 
     socket.on('reload', function () {
         location.reload();
-    })
+    });
 
     //Handles connection
     socket.on('connected', function (data) {
@@ -79,10 +79,11 @@ $(function () {
                 socket.emit('image_upload', { img: res.file })
             },
             error: function (res) {
-                socket.emit('alert', { message: res })
+                console.log(res.responseText);
+                socket.emit('alert_message', { message: res.responseText })
             }
         });
-    })
+    });
 
     //Alerts for user
     socket.on('alert', function (data) {
@@ -95,6 +96,7 @@ $(function () {
         chatroom.append($('<tr scope="row" class="cursor-pointer">').append('<p style="font-weight: bold">' + data.username + ": </p>" + '<img style="max-height: 5rem; max-width: 5rem" src=' + imgSrc +'>'));
     });
 
+    //Fill message input field scripts
     users.on("click", "tr", function(e) {
         message.val('@' + $(this).text() + ': ');
     });

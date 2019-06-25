@@ -88,6 +88,14 @@
                 }, "fast");
             });
         });
+
+        $(function () {
+            $("#image").change(function () {
+                $('#chatWindow').animate({
+                    scrollTop: $('#chatWindow')[0].scrollHeight
+                }, "fast");
+            });
+        });
     </script>
 
 </html>
